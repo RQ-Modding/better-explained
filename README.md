@@ -14,10 +14,10 @@ Appends a compact Crit/Stun/Poison line under skill hover **only** when the skil
 
 ## Examples
 
-**Shuriken (121)** — physical; stun via `衝撃計算` + `機能` 59; poison via path + coat:
+**Shuriken (121)** — physical; stun via `衝撃計算` + `機能` 59; no skill-id poison rate:
 
 ```text
-Can Crit / Can Stun / Can Poison
+Can Crit / Can Stun / Can Poison (coat)
 ```
 
 **Poison Effect (264)** — yellow ability (coats weapons; no own hit roll):
@@ -26,19 +26,17 @@ Can Crit / Can Stun / Can Poison
 (no Crit/Stun/Poison line)
 ```
 
-**Fortune (448)**:
+**Fortune (448)** — physical path still calls `毒計算` (no 448 skip; only stun is skipped):
 
 ```text
-Can't Crit / Can't Stun / Can Poison
+Can't Crit / Can't Stun / Can Poison (coat)
 Ignores accuracy
 ```
-
-(`Can Poison`: Fortune is physical, so `毒計算` still runs; Poison Effect coat / weapon 118 can fill the rate. Stun is hard-skipped.)
 
 **Melee Attack 1 (100)**:
 
 ```text
-Can Crit / Can Stun / Can Poison
+Can Crit / Can Stun / Can Poison (coat)
 ```
 
 **Efficient Action (245)** or other yellow/blue utility: no line.
@@ -49,7 +47,7 @@ Can Crit / Can Stun / Can Poison
 | --- | --- |
 | **Crit** | `倍率 > 150` or id **120** → Can't; else Can (`クリティカル計算`, physical path) |
 | **Stun** | Physical except **120 / 448 / 152** → Can (`衝撃計算`). Also `機能==59`, ids **149 / 183 / 422 / 507** |
-| **Poison** | Physical except **120** → Can (`毒計算`: skill-id rates, else weapon **118**, else **Poison Effect 264** coat via `ＣＳ有無／ランク別効果`). Special ids **433 / 545**. Skill hover cannot see “is 264 equipped”, so physical **Can Poison** means the poison roll is possible for this skill |
+| **Poison** | Inherent skill-id rates / specials → `Can Poison`. Other physical except **120** → `Can Poison (coat)` (`毒計算` still runs; weapon **118** or **264** fills `bb`). Fortune **448** is coat-eligible (called from `Ｔ物理攻撃行動`; no 448 poison skip). Assassinate **120** → `Can't Poison` |
 | **Accuracy** | `Ignores accuracy` when `機能` **56** or **79** |
 
 ### Poison coat evidence
