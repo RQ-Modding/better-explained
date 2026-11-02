@@ -125,7 +125,7 @@ end
 rq.log("better-explained: trio on hit skills; poison = skill rate or (coat)")
 
 if not rq.skill.install() then
-  error("better-explained: rq.skill.install failed (see mods/rqmod.log)")
+  error("better-explained: rq.skill.install failed (see logs/rqmod.log)")
 end
 
 rq.skill.on_describe(function(skillNo, baseText)
