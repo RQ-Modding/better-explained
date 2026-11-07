@@ -43,7 +43,7 @@ hover text works beside it; load order decides whose text comes last.
 
 ## Install
 
-Needs [RQ MOD](https://github.com/RQ-Modding/RQ-Mod) with loader **0.2.0** or newer. Extract the
+Needs [RQ MOD](https://github.com/RQ-Modding/RQ-Mod) with loader **1.15.0** or newer. Extract the
 release zip into the game's `mods` folder, so that you have `mods/better-explained/mod.json`.
 
 ## How it works

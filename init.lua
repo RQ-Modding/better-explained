@@ -2,38 +2,30 @@
 -- Omit on yellow abilities / blue support / white passives that don't hit.
 -- Poison: physical 毒計算 can use skill rates OR Poison Effect (264) coat OR weapon 118.
 
+local SK = rq.ids.skill
+local ASSASSINATE, FORTUNE = SK.ASSASSINATE, SK.FORTUNE_448
+
+local function set(list)
+  local t = {}
+  for _, no in ipairs(list) do t[no] = true end
+  return t
+end
+
 -- 衝撃計算 early-out
-local NO_STUN = {
-  [120] = true, -- Assassinate
-  [448] = true, -- Fortune
-  [152] = true, -- Leazas' Lightning Dragon
-}
+local NO_STUN = set{ ASSASSINATE, FORTUNE, SK.LEAZAS_LIGHTNING_DRAGON }
 
 -- Stun outside physical 衝撃計算
-local EXTRA_STUN = {
-  [149] = true,
-  [183] = true,
-  [422] = true,
-  [507] = true,
-}
+local EXTRA_STUN = set{ SK.VERBAL_ABUSE, SK.ELECTROSHOCK, SK.DEVILS_FACE_FLASH, SK.SLEEP }
 
--- Skill-id rates inside 毒計算 (+ 特殊 433/545)
-local SKILL_POISON = {
-  [390] = true,
-  [404] = true,
-  [424] = true,
-  [443] = true,
-  [539] = true,
-  [560] = true,
-  [561] = true,
-  [562] = true,
-  [590] = true,
-  [433] = true,
-  [545] = true,
+-- Skill-id rates inside 毒計算 (+ the specials Queen's Curse and Deadly Mist)
+local SKILL_POISON = set{
+  SK.ATTACK_390, SK.ATTACK_404, SK.POISON_JAB, SK.POISON_GAS_BREATH, SK.SWORD_ATTACK_539,
+  SK.FLAME_BREATH, SK.FREEZING_BREATH, SK.DARK_BREATH, SK.NATURAL_POISON,
+  SK.QUEENS_CURSE, SK.DEADLY_MIST,
 }
 
 local function can_crit(skillNo, bairitsu)
-  if skillNo == 120 then
+  if skillNo == ASSASSINATE then
     return false
   end
   return not (bairitsu and bairitsu > 150)
@@ -60,7 +52,7 @@ end
   Hover is skill-only, so coat means eligible if weapon 118 / Poison Effect 264.
 ]]
 local function poison_kind(skillNo, koudou)
-  if skillNo == 120 then
+  if skillNo == ASSASSINATE then
     return false
   end
   if SKILL_POISON[skillNo] then
@@ -145,7 +137,7 @@ rq.skill.on_describe(function(skillNo, baseText)
     return baseText
   end
 
-  if skillNo == 448 or skillNo == 121 or skillNo == 264 then
+  if skillNo == FORTUNE or skillNo == SK.SHURIKEN or skillNo == SK.POISON_EFFECT then
     rq.log(string.format("hover %d: %s", skillNo, table.concat(lines, " | ")))
   end
 
