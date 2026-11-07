@@ -1,70 +1,62 @@
-# better-explained
+# Better Explained
 
-Appends a compact Crit/Stun/Poison line under skill hover **only** when the skill participates in those combat rolls. Showcase: Copandon **Fortune** (**448**), Suzume **Shuriken** (**121**).
+Adds a short line to a skill's hover text that says whether the skill can land a critical hit, stun
+or poison, and whether it ignores accuracy.
 
-## When the line appears
+## What it changes
 
-| Skill kind (`行動種類` / panel) | Trio line? |
-| --- | --- |
-| Physical attack (`行動種類==1`, red ~panel 100) | Yes |
-| Magic / support / abilities (blue 101, yellow 102, white/Z) | **No**, unless a known stun/poison special |
-| Specials with `機能==59` or hardcode stun/poison ids | Yes |
-
-**Poison Effect (264)** and **Counter (259)** are yellow abilities → **no line** (they don't roll hit/crit themselves).
-
-## Examples
-
-**Shuriken (121)** — physical; stun via `衝撃計算` + `機能` 59; no skill-id poison rate:
+Under the hover text of a skill that rolls those things in a fight, one line such as:
 
 ```text
 Can Crit / Can Stun / Can Poison (coat)
 ```
 
-**Poison Effect (264)** — yellow ability (coats weapons; no own hit roll):
+and, for a skill that always hits:
 
 ```text
-(no Crit/Stun/Poison line)
-```
-
-**Fortune (448)** — physical path still calls `毒計算` (no 448 skip; only stun is skipped):
-
-```text
-Can't Crit / Can't Stun / Can Poison (coat)
 Ignores accuracy
 ```
 
-**Melee Attack 1 (100)**:
+- **Can Poison** means the skill has its own poison chance. **Can Poison (coat)** means it poisons
+  only when the attacker's weapon or **Poison Effect** supplies the poison, as for most physical
+  attacks.
+- The line appears on physical attacks and on the few special skills that stun or poison. Magic,
+  support skills and abilities (yellow and white skills such as Counter or Poison Effect) get no
+  line, since they do not roll a hit of their own.
 
-```text
-Can Crit / Can Stun / Can Poison (coat)
-```
+Examples: **Melee Attack** says Can Crit / Can Stun / Can Poison (coat). Copandon's **Fortune** says
+Can't Crit / Can't Stun / Can Poison (coat) and Ignores accuracy (with Copandon Dot QoL it says Can
+Crit / Can Stun).
 
-**Efficient Action (245)** or other yellow/blue utility: no line.
+## Keys and settings
 
-## Inference (Magnum `戦闘関係.jaf`)
+None.
+
+## Saves
+
+Nothing. It only changes text.
+
+## Works with
+
+Copandon Dot QoL loads after it and corrects the Fortune line. Any other mod that changes skill
+hover text works beside it; load order decides whose text comes last.
+
+## Install
+
+Needs [RQ MOD](https://github.com/RQ-Modding/RQ-Mod) with loader **0.2.0** or newer. Extract the
+release zip into the game's `mods` folder, so that you have `mods/better-explained/mod.json`.
+
+## How it works
+
+The rules follow the game's own combat code (`戦闘関係.jaf`):
 
 | Tag | Rule |
 | --- | --- |
-| **Crit** | `倍率 > 150` or id **120** → Can't; else Can (`クリティカル計算`, physical path) |
-| **Stun** | Physical except **120 / 448 / 152** → Can (`衝撃計算`). Also `機能==59`, ids **149 / 183 / 422 / 507** |
-| **Poison** | Inherent skill-id rates / specials → `Can Poison`. Other physical except **120** → `Can Poison (coat)` (`毒計算` still runs; weapon **118** or **264** fills `bb`). Fortune **448** is coat-eligible (called from `Ｔ物理攻撃行動`; no 448 poison skip). Assassinate **120** → `Can't Poison` |
-| **Accuracy** | `Ignores accuracy` when `機能` **56** or **79** |
+| Crit | Can't when the damage multiplier is above 150, or for Assassinate (120). Else Can (`クリティカル計算`). |
+| Stun | Physical attacks can, except Assassinate (120), Fortune (448) and Leazas' Lightning Dragon (152) (`衝撃計算`). Also skills with function 59, and skills 149, 183, 422 and 507. |
+| Poison | Skills with their own poison rate in `毒計算` say Can Poison. Other physical attacks except Assassinate say Can Poison (coat): `毒計算` still runs, and weapon 118 or Poison Effect (264) fills the rate. |
+| Accuracy | Ignores accuracy for function 56 or 79. |
 
-### Poison coat evidence
+## License
 
-```text
-毒計算:
-  … skill-id rates …
-  if weapon == 118 → bb = 100
-  if bb == 0 → bb = ＣＳ有無／ランク別効果(attacker, 264, 0)  // Poison Effect
-  if iis == 120 → bb = 0
-```
-
-Called from `Ｔ物理攻撃行動` only. Shuriken is not in the skill-id rate list, but with Poison Effect equipped the coat supplies `bb`. Saying `Can't Poison` on Shuriken was wrong.
-
-## Needs
-
-1. Fork with `rq.skill.get` (`koudou` / `kouka`)
-2. `rqmod\apply.ps1` → Magnum Mods copy only
-
-Local-only git. No remote.
+MIT, see [LICENSE](LICENSE).
