@@ -1,149 +1,55 @@
--- Compact Crit/Stun/Poison on skills that actually roll those in combat.
--- Omit on yellow abilities / blue support / white passives that don't hit.
--- Poison: physical 毒計算 can use skill rates OR Poison Effect (264) coat OR weapon 118.
+-- Better Explained: a line on a skill's hover text that says whether it can crit, stun or poison,
+-- and whether it ignores accuracy.
+-- API reference: https://rq-modding.github.io/rq-modding-docs/reference/
+--
+-- 1.1.0: the rules are the loader's (rq.combat.rules, loader 2.44.0), read at each hover: the
+-- skill's data as it is then, the game's rules by skill number, and what other mods set with
+-- rq.combat.set_rules. The mod keeps no list of its own, so a mod that changes a skill's rule is
+-- shown right without knowing this one.
 
-local SK = rq.ids.skill
-local ASSASSINATE, FORTUNE = SK.ASSASSINATE, SK.FORTUNE_448
-
-local function set(list)
-  local t = {}
-  for _, no in ipairs(list) do t[no] = true end
-  return t
-end
-
--- 衝撃計算 early-out
-local NO_STUN = set{ ASSASSINATE, FORTUNE, SK.LEAZAS_LIGHTNING_DRAGON }
-
--- Stun outside physical 衝撃計算
-local EXTRA_STUN = set{ SK.VERBAL_ABUSE, SK.ELECTROSHOCK, SK.DEVILS_FACE_FLASH, SK.SLEEP }
-
--- Skill-id rates inside 毒計算 (+ the specials Queen's Curse and Deadly Mist)
-local SKILL_POISON = set{
-  SK.ATTACK_390, SK.ATTACK_404, SK.POISON_JAB, SK.POISON_GAS_BREATH, SK.SWORD_ATTACK_539,
-  SK.FLAME_BREATH, SK.FREEZING_BREATH, SK.DARK_BREATH, SK.NATURAL_POISON,
-  SK.QUEENS_CURSE, SK.DEADLY_MIST,
-}
-
-local function can_crit(skillNo, bairitsu)
-  if skillNo == ASSASSINATE then
-    return false
-  end
-  return not (bairitsu and bairitsu > 150)
-end
-
-local function can_stun(skillNo, koudou, kinou)
-  if NO_STUN[skillNo] then
-    return false
-  end
-  if koudou == 1 then
-    return true
-  end
-  if kinou == 59 then
-    return true
-  end
-  return EXTRA_STUN[skillNo] == true
-end
-
---[[
-  毒計算 (from Ｔ物理攻撃行動 — Fortune 448 included; no 448 skip):
-    skill-id rates → else weapon 118 → else if bb==0: ＣＳ有無／ランク別効果(iic, 264)
-    iis==120 forces bb=0
-  Returns: false | "skill" | "coat"
-  Hover is skill-only, so coat means eligible if weapon 118 / Poison Effect 264.
-]]
-local function poison_kind(skillNo, koudou)
-  if skillNo == ASSASSINATE then
-    return false
-  end
-  if SKILL_POISON[skillNo] then
-    return "skill"
-  end
-  if koudou == 1 then
-    return "coat" -- path runs 毒計算; coat/weapon can fill bb (incl. Fortune 448)
-  end
-  return false
-end
-
---[[
-  Show the trio only when this skill participates in hit/crit/stun/poison math.
-  行動種類: 1 physical, 2 magic, 3 special, 4 support, 0 ability (yellow/white).
-  Abilities (Poison Effect 264, Counter 259, …) and support blues: omit.
-]]
-local function show_trio(skillNo, koudou, kinou)
-  if koudou == 1 then
-    return true -- red physical (Ｔ物理攻撃行動)
-  end
-  if EXTRA_STUN[skillNo] or kinou == 59 then
-    return true
-  end
-  if SKILL_POISON[skillNo] then
-    return true
-  end
-  return false
-end
-
-local function tag(ok, yes, no)
-  if ok then
-    return yes
-  end
+local function tag(v, yes, no)
+  if v == "sometimes" then return yes .. " (sometimes)" end
+  if v then return yes end
   return no
 end
 
-local function poison_tag(kind)
-  if kind == "skill" then
-    return "Can Poison"
-  end
-  if kind == "coat" then
-    return "Can Poison (coat)"
-  end
+local function poison_tag(v)
+  if v == "own" then return "Can Poison" end
+  if v == "coat" then return "Can Poison (coat)" end
+  if v == "sometimes" then return "Can Poison (sometimes)" end
   return "Can't Poison"
 end
 
-local function trio_line(skillNo, info)
-  local bairitsu = info and info.bairitsu or 0
-  local kinou = info and info.kinou or 0
-  local koudou = info and info.koudou or 0
-  return table.concat({
-    tag(can_crit(skillNo, bairitsu), "Can Crit", "Can't Crit"),
-    tag(can_stun(skillNo, koudou, kinou), "Can Stun", "Can't Stun"),
-    poison_tag(poison_kind(skillNo, koudou)),
-  }, " / ")
-end
-
-local function ignores_accuracy(kinou)
-  return kinou == 56 or kinou == 79
-end
-
-rq.log("better-explained: trio on hit skills; poison = skill rate or (coat)")
-
-if not rq.skill.install() then
-  error("better-explained: rq.skill.install failed (see logs/rqmod.log)")
-end
-
-rq.skill.on_describe(function(skillNo, baseText)
-  local info = rq.skill.get(skillNo)
-  local kinou = info and info.kinou or 0
-  local koudou = info and info.koudou or 0
+-- The line shows on a skill that rolls one of the three in a fight: physical attacks and the few
+-- special skills that stun or poison. Magic, support skills and abilities get none.
+local function lines_of(no)
+  local r = rq.combat.rules(no)
+  if not r then return {} end
   local lines = {}
-
-  if show_trio(skillNo, koudou, kinou) then
-    lines[#lines + 1] = trio_line(skillNo, info)
+  if r.crit ~= false or r.stun ~= false or r.poison ~= false then
+    lines[#lines + 1] = table.concat({
+      tag(r.crit, "Can Crit", "Can't Crit"),
+      tag(r.stun, "Can Stun", "Can't Stun"),
+      poison_tag(r.poison),
+    }, " / ")
   end
-  if ignores_accuracy(kinou) then
+  if r.accuracy == "ignores" then
     lines[#lines + 1] = "Ignores accuracy"
   end
+  return lines
+end
 
-  if #lines == 0 then
-    return baseText
-  end
-
-  if skillNo == FORTUNE or skillNo == SK.SHURIKEN or skillNo == SK.POISON_EFFECT then
-    rq.log(string.format("hover %d: %s", skillNo, table.concat(lines, " | ")))
-  end
-
+rq.skill.on_describe(function(no, text)
+  local lines = lines_of(no)
+  if #lines == 0 then return text end
   local extra = table.concat(lines, "\n")
-  if not baseText or baseText == "" then
-    return extra
-  end
-  return baseText .. "\n" .. extra
+  if not text or text == "" then return extra end
+  return text .. "\n" .. extra
 end)
+
+rq.log("better-explained: the hover's line from rq.combat.rules")
+
+-- For tests and other mods (rq.mod.get("better-explained")): the lines a skill's hover gets.
+return {
+  lines = lines_of,
+}
