@@ -21,8 +21,8 @@ returns the lines a skill's hover gets.
 6. `rq.combat.set_rules(152, { stun = true })` changes 152's hover to `Can Stun` at once;
    `{ stun = "game" }` puts it back.
 
-## Test Lab
+## Tested in the game
 
-`agent-lab.ps1 run spellblade` checks the Fortune hover with this mod and Copandon Dot QoL;
-`run rules` checks the lines of Melee Attack, Assassinate and Poison Effect, and a rule set and put
+The Test Lab's scenario `spellblade` checks the Fortune hover with this mod and Copandon Dot QoL;
+`rules` checks the lines of Melee Attack, Assassinate and Poison Effect, and a rule set and put
 back on 152.
