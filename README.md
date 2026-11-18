@@ -3,6 +3,10 @@
 Adds a short line to a skill's hover text that says whether the skill can land a critical hit, stun
 or poison, and whether it ignores accuracy.
 
+## Explaning Lia Lightning Dragon
+
+<img width="636" height="246" alt="image" src="https://github.com/user-attachments/assets/ca78dc4a-c1a5-4c4a-a0b6-05c3b8f8a2e4" />
+
 ## What it changes
 
 Under the hover text of a skill that rolls those things in a fight, one line such as:
