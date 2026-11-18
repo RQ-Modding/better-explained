@@ -9,8 +9,9 @@ section of a tagged version into the release notes.
   lists in the mod: a mod that changes a skill's rule with `rq.combat.set_rules` is shown right, as
   Copandon Dot QoL's Fortune, and needs no change to this mod's text.
 - **(sometimes)** where the game's rule has exceptions: a skill whose critical chance the game sets
-  to 0 (a multiplier above 150, or Assassinate) says Can Crit (sometimes), since skill 549 or party
-  item 91 can still raise it. It said Can't Crit.
+  to 0 (a multiplier above 150, or Assassinate) says Can Crit (sometimes), since Low Blow (549)
+  against a man, or Kojika in the party for an enemy's attack, can still raise it. It said Can't
+  Crit.
 - The hovers of Fortune, Shuriken and Poison Effect are no longer written to the log.
 - For agents: `rq.mod.get("better-explained").lines(skill)` gives a skill's lines.
 - Needs loader 2.44.0.

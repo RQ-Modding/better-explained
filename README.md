@@ -21,8 +21,9 @@ Ignores accuracy
   only when the attacker's weapon or **Poison Effect** supplies the poison, as for most physical
   attacks.
 - **(sometimes)** means the game's rule has exceptions: **Can Crit (sometimes)** is a skill whose
-  critical chance the game sets to 0 (a damage multiplier above 150, or Assassinate), which a
-  character's skill or a party item can still raise.
+  critical chance the game sets to 0 (a damage multiplier above 150, or Assassinate). The game
+  still raises it in two cases: an attacker with **Low Blow** against a man or a Guy Monster, on
+  half the attacks, and an enemy's attack while Kojika Yamanaka is in the party.
 - The line appears on physical attacks and on the few special skills that stun or poison. Magic,
   support skills and abilities (yellow and white skills such as Counter or Poison Effect) get no
   line, since they do not roll a hit of their own.
@@ -58,7 +59,7 @@ code (`戦闘関係.jaf`), and what mods set:
 
 | Tag | Rule |
 | --- | --- |
-| Crit | Physical attacks can (`クリティカル計算`). Sometimes when the damage multiplier is above 150, or for Assassinate (120): the game sets the chance to 0, then skill 549 or party item 91 can add to it. |
+| Crit | Physical attacks can (`クリティカル計算`). Sometimes when the damage multiplier is above 150, or for Assassinate (120): the game sets the chance to 0, then Low Blow (549) adds 50 on half the rolls against a man or race 4, and character 91 (Kojika) in the party adds 30 to an enemy's attack. |
 | Stun | Physical attacks can, except Assassinate (120), Fortune (448) and Leazas' Lightning Dragon (152) (`衝撃計算`). Also skills with function 59, and skills 149, 183, 422 and 507. |
 | Poison | Skills with their own poison rate in `毒計算` say Can Poison. Other physical attacks except Assassinate say Can Poison (coat): `毒計算` still runs, and weapon 118 or Poison Effect (264) fills the rate. |
 | Accuracy | Ignores accuracy for function 56 or 79. |
